@@ -17,6 +17,7 @@ const book_model_1 = __importDefault(require("./book.model"));
 const mongoose_1 = __importDefault(require("mongoose"));
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // console.log("Received body:", req.body);  
     try {
         const data = yield book_model_1.default.create(req.body);
         res.send({
@@ -27,14 +28,12 @@ const createBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
     catch (error) {
         if (error instanceof mongoose_1.default.Error.ValidationError) {
-            //  Handle schema validation error
             return res.status(400).json({
                 message: "Validation failed",
                 success: false,
                 error,
             });
         }
-        // Handle other errors
         return res.status(500).json({
             message: "Failed to create book",
             success: false,
@@ -44,13 +43,11 @@ const createBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 const getBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { filter, sortBy = "createdAt", sort = "asc", limit = "10" } = req.query;
-        // Build query object for filtering
+        const { filter, sortBy = "createdAt", sort = "asc", limit = "10", } = req.query;
         const query = {};
         if (filter) {
             query.genre = filter; // filter by genre
         }
-        // Convert limit and sort
         const sortOrder = sort === "desc" ? -1 : 1;
         const resultLimit = parseInt(limit, 10);
         const data = yield book_model_1.default.find(query)
@@ -91,20 +88,35 @@ const getBookById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 const updateBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const bookId = req.params.bookId;
-        const data = yield book_model_1.default.findByIdAndUpdate(bookId, req.body, {
+        // console.log("📦 Book Data:", req.body);
+        if (!mongoose_1.default.Types.ObjectId.isValid(bookId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid book ID",
+                error: `Provided ID '${bookId}' is not valid`,
+            });
+        }
+        const updatedBook = yield book_model_1.default.findByIdAndUpdate(bookId, req.body, {
             new: true,
             runValidators: true,
         });
-        res.send({
+        if (!updatedBook) {
+            return res.status(404).json({
+                success: false,
+                message: "Book not found",
+                error: `No book found with ID ${bookId}`,
+            });
+        }
+        return res.status(200).json({
             success: true,
-            message: "book updated successfully",
-            data,
+            message: "Book updated successfully",
+            data: updatedBook,
         });
     }
     catch (error) {
-        res.status(500).send({
+        return res.status(500).json({
             success: false,
-            message: "Failed to get book",
+            message: "Failed to update book",
             error: error instanceof Error ? error.message : "Unknown error",
         });
     }
@@ -112,15 +124,22 @@ const updateBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 const deleteBookById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const bookId = req.params.bookId;
-        const data = yield book_model_1.default.findByIdAndDelete(bookId);
-        res.send({
+        const book = yield book_model_1.default.findByIdAndDelete(bookId);
+        if (!book) {
+            return res.status(404).json({
+                success: false,
+                message: "Book not found",
+                error: `No book found with ID ${bookId}`,
+            });
+        }
+        res.status(200).json({
             success: true,
-            message: "book delete successfully",
-            data,
+            message: "Book deleted successfully",
+            data: null,
         });
     }
     catch (error) {
-        res.status(500).send({
+        res.status(500).json({
             success: false,
             message: "Failed to delete book",
             error: error instanceof Error ? error.message : "Unknown error",

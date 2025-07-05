@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable @typescript-eslint/no-this-alias */
 const mongoose_1 = require("mongoose");
 const book_model_1 = __importDefault(require("../book/book.model"));
 const borrowSchema = new mongoose_1.Schema({

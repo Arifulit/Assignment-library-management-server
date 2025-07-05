@@ -15,22 +15,44 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.borrowController = void 0;
 const catchAsync_1 = require("../../utils/catchAsync");
 const borrow_model_1 = __importDefault(require("./borrow.model"));
-const createBorrow = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { book, quantity, dueDate } = req.body;
-    const borrow = yield borrow_model_1.default.create({ book, quantity, dueDate });
+// ✅ Create borrow record
+const createBorrow = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { bookId, quantity, dueDate } = req.body;
+    const borrow = yield borrow_model_1.default.create({
+        book: bookId,
+        quantity,
+        dueDate,
+    });
+    // console.log("Borrow created:", borrow);
     res.status(201).json({
         success: true,
         message: "Book borrowed successfully",
         data: borrow,
     });
 }));
-// Get Borrow Summary
+// ✅ Get borrow record by ID
+const getBorrowById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { borrowId } = req.params;
+    const borrow = yield borrow_model_1.default.findById(borrowId).populate("book");
+    if (!borrow) {
+        return res.status(404).json({
+            success: false,
+            message: "Borrow record not found",
+        });
+    }
+    res.status(200).json({
+        success: true,
+        message: "Borrow record retrieved successfully",
+        data: borrow,
+    });
+}));
+// ✅ Borrow summary: Total borrow count per book
 const getBorrowSummary = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const summary = yield borrow_model_1.default.aggregate([
         {
             $group: {
                 _id: "$book",
-                totalQuantity: { $sum: "$quantity" },
+                totalBorrowed: { $sum: "$quantity" },
             },
         },
         {
@@ -45,11 +67,9 @@ const getBorrowSummary = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(vo
         {
             $project: {
                 _id: 0,
-                totalQuantity: 1,
-                book: {
-                    title: "$book.title",
-                    isbn: "$book.isbn",
-                },
+                title: "$book.title",
+                isbn: "$book.isbn",
+                totalBorrowed: 1,
             },
         },
     ]);
@@ -62,4 +82,5 @@ const getBorrowSummary = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(vo
 exports.borrowController = {
     createBorrow,
     getBorrowSummary,
+    getBorrowById,
 };

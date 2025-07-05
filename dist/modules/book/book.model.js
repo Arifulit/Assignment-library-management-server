@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 const mongoose_1 = require("mongoose");
 const book_interface_1 = require("./book.interface");
 const bookSchema = new mongoose_1.Schema({
@@ -38,6 +39,13 @@ const bookSchema = new mongoose_1.Schema({
     },
 }, {
     timestamps: true,
+    toJSON: {
+        virtuals: true,
+        transform: (_, ret) => {
+            ret.id = ret._id;
+            delete ret.__v;
+        },
+    },
 });
 // Instance method to update availability based on copies
 bookSchema.methods.updateAvailability = function () {
