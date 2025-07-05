@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createBook: any = async (req: Request, res: Response) => {
-  console.log("Received body:", req.body);  
+  // console.log("Received body:", req.body);  
   try {
     const data = await Book.create(req.body);
     res.send({
@@ -166,9 +166,4 @@ export const bookController = {
   deleteBookById,
 };
 
-// Create a router instance and define routes
-// const router = Router();
-// router.post("/", bookController.createBook);
 
-// Export the router for use in your app
-// export default router;

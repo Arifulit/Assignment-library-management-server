@@ -15,7 +15,7 @@ const createBorrow = catchAsync(async (req: Request, res: Response) => {
     dueDate,
   });
 
-  console.log("Borrow created:", borrow);
+  // console.log("Borrow created:", borrow);
 
   res.status(201).json({
     success: true,
