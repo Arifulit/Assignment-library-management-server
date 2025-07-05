@@ -9,11 +9,10 @@ const app = express();
 app.use(
   cors({
     origin: [
-      // "http://localhost:5173",
-      "https://library-management-client-ruby.vercel.app"
+      "http://localhost:5173",
+      // "https://library-management-client-ruby.vercel.app"
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+   
   })
 );
 

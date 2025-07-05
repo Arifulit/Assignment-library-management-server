@@ -1,21 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { catchAsync } from "../../utils/catchAsync";
 import Borrow from "./borrow.model";
+import Book from "../book/book.model";
 
 
-// ✅ Create borrow record
+// ✅ Create a new borrow record
+
 const createBorrow = catchAsync(async (req: Request, res: Response) => {
-  const { bookId, quantity, dueDate } = req.body;
+  // console.log("Request Body:", req.body);
+
+  
+  const bookId = req.body.bookId || req.body.book;
+
+  if (!bookId) {
+    return res.status(400).json({ success: false, message: "Book ID is required" });
+  }
+
+  const { quantity, dueDate } = req.body;
 
   const borrow = await Borrow.create({
     book: bookId,
     quantity,
     dueDate,
   });
-
-  // console.log("Borrow created:", borrow);
 
   res.status(201).json({
     success: true,
@@ -24,7 +34,8 @@ const createBorrow = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// ✅ Get borrow record by ID
+
+// Get borrow record by ID
 const getBorrowById = catchAsync(async (req: Request, res: Response) => {
   const { borrowId } = req.params;
 
@@ -44,6 +55,28 @@ const getBorrowById = catchAsync(async (req: Request, res: Response) => {
     data: borrow,
   });
 });
+
+// ✅ Get borrow record(s) by book ID
+const getBorrowByBookId = catchAsync(async (req: Request, res: Response) => {
+  const { bookId } = req.params;
+
+  const borrows = await Borrow.find({ book: bookId }).populate("book");
+
+  if (!borrows.length) {
+    return res.status(404).json({
+      success: false,
+      message: "No borrow records found for this book",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Borrow records retrieved successfully",
+    data: borrows,
+  });
+});
+
+
 
 // ✅ Borrow summary: Total borrow count per book
 const getBorrowSummary = catchAsync(async (req: Request, res: Response) => {
@@ -80,8 +113,10 @@ const getBorrowSummary = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
 export const borrowController = {
   createBorrow,
   getBorrowSummary,
   getBorrowById,
+  getBorrowByBookId
 };
