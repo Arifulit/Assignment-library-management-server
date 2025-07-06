@@ -6,15 +6,11 @@ import routes from "./modules/routes";
 
 const app = express();
 
-
 app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://library-management-client-ruby.vercel.app"
   ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json());
@@ -27,20 +23,17 @@ app.get("/", (req, res) => {
   });
 });
 
-app.listen(config.port, () => {
-  console.log("Server is running on port 5000");
-});
-
-
 async function server() {
   try {
-    console.log(config);
-    await mongoose.connect(config.databse_url!);
+    await mongoose.connect(config.database_url!); 
+    console.log("✅ Database connected successfully");
 
-    console.log(`Database connected successfully ${5000}`);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    app.listen(config.port, () => {
+      console.log(`Server is running on port ${config.port}`);
+    });
+
   } catch (error) {
-    console.error(`server error: ${server}`);
+    console.error("❌ Error connecting to server:", error);
   }
 }
 
