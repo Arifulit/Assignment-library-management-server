@@ -6,7 +6,7 @@ A robust and scalable RESTful API for managing books and borrow transactions in 
 
 
 
-🔗 **Live Demo:** [assignment-library-management-xi.vercel.app](https://assignment-library-management-xi.vercel.app/)
+🔗 **Live Demo:** [assignment-library-management-server.onrender.com](https://assignment-library-management-server.onrender.com/)
 
 ---
 
