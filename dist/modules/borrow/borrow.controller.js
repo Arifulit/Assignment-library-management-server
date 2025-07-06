@@ -15,22 +15,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.borrowController = void 0;
 const catchAsync_1 = require("../../utils/catchAsync");
 const borrow_model_1 = __importDefault(require("./borrow.model"));
-// ✅ Create borrow record
+// ✅ Create a new borrow record
 const createBorrow = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { bookId, quantity, dueDate } = req.body;
+    // console.log("Request Body:", req.body);
+    const bookId = req.body.bookId || req.body.book;
+    if (!bookId) {
+        return res.status(400).json({ success: false, message: "Book ID is required" });
+    }
+    const { quantity, dueDate } = req.body;
     const borrow = yield borrow_model_1.default.create({
         book: bookId,
         quantity,
         dueDate,
     });
-    // console.log("Borrow created:", borrow);
     res.status(201).json({
         success: true,
         message: "Book borrowed successfully",
         data: borrow,
     });
 }));
-// ✅ Get borrow record by ID
+// Get borrow record by ID
 const getBorrowById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { borrowId } = req.params;
     const borrow = yield borrow_model_1.default.findById(borrowId).populate("book");
@@ -44,6 +48,22 @@ const getBorrowById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 
         success: true,
         message: "Borrow record retrieved successfully",
         data: borrow,
+    });
+}));
+// ✅ Get borrow record(s) by book ID
+const getBorrowByBookId = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { bookId } = req.params;
+    const borrows = yield borrow_model_1.default.find({ book: bookId }).populate("book");
+    if (!borrows.length) {
+        return res.status(404).json({
+            success: false,
+            message: "No borrow records found for this book",
+        });
+    }
+    res.status(200).json({
+        success: true,
+        message: "Borrow records retrieved successfully",
+        data: borrows,
     });
 }));
 // ✅ Borrow summary: Total borrow count per book
@@ -83,4 +103,5 @@ exports.borrowController = {
     createBorrow,
     getBorrowSummary,
     getBorrowById,
+    getBorrowByBookId
 };

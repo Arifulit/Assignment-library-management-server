@@ -19,7 +19,10 @@ const config_1 = __importDefault(require("./config"));
 const routes_1 = __importDefault(require("./modules/routes"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: ['https://library-management-client-ruby.vercel.app'],
+    origin: [
+        "http://localhost:5173",
+        "https://library-management-client-ruby.vercel.app"
+    ],
 }));
 app.use(express_1.default.json());
 app.use(routes_1.default);
@@ -29,19 +32,17 @@ app.get("/", (req, res) => {
         message: "Welcome to Library Management System API",
     });
 });
-app.listen(config_1.default.port, () => {
-    console.log("Server is running on port 5000");
-});
 function server() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log(config_1.default);
-            yield mongoose_1.default.connect(config_1.default.databse_url);
-            console.log(`Database connected successfully ${5000}`);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            yield mongoose_1.default.connect(config_1.default.database_url);
+            console.log("✅ Database connected successfully");
+            app.listen(config_1.default.port, () => {
+                console.log(`Server is running on port ${config_1.default.port}`);
+            });
         }
         catch (error) {
-            console.error(`server error: ${server}`);
+            console.error("❌ Error connecting to server:", error);
         }
     });
 }
